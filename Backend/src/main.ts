@@ -9,27 +9,15 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  // CORS: be permissive in development to avoid preflight issues; restrict via env in production
-  const isProd = process.env.NODE_ENV === 'production';
-  if (!isProd) {
-    app.enableCors({
-      origin: true, // reflect request origin
-      credentials: true,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      allowedHeaders: 'Content-Type, Authorization',
-    });
-  } else {
-    const envOrigins = (process.env.CORS_ORIGIN || '')
-      .split(',')
-      .map((o) => o.trim())
-      .filter(Boolean);
-    app.enableCors({
-      origin: envOrigins,
-      credentials: true,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      allowedHeaders: 'Content-Type, Authorization',
-    });
-  }
+  // CORS: allow all origins (useful for quick demos or when deploying FE/BE separately)
+  // NOTE: This is permissive. For production security, replace `origin: true` with an
+  // allowlist from process.env.CORS_ORIGIN and redeploy.
+  app.enableCors({
+    origin: true, // reflect request origin, effectively allowing all
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

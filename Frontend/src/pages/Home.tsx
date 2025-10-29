@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const location = useLocation();
@@ -29,8 +29,20 @@ export default function Home() {
             This demo showcases a simple registration flow with a NestJS backend and a React frontend.
           </p>
           <div className="mt-6 flex gap-3">
-            <Link to="/register" className="btn btn-primary">Get Started</Link>
-            <Link to="/login" className="btn btn-outline">I already have an account</Link>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate('/register')}
+            >
+              Get Started
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => navigate('/login')}
+            >
+              I already have an account
+            </button>
           </div>
         </div>
         <div className="card">
