@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 
 // Ensure environment variables are loaded before reading process.env here
@@ -23,6 +24,7 @@ dotenv.config();
       }),
     }),
     UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

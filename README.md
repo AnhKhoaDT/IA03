@@ -1,14 +1,16 @@
-IA03 – User Registration API with React Frontend
+IA03 – React Authentication with JWT (Access + Refresh)
 
-A full-stack demo built with:
-- Backend: NestJS + Mongoose (MongoDB)
+Full-stack app implementing secure authentication using:
+- Backend: NestJS + JWT + Mongoose (MongoDB)
 - Frontend: React + Vite + Tailwind CSS, React Router, React Query, React Hook Form + Zod
 
 ## Features
-- POST `/user/register` endpoint with validation, duplicate email check, and bcrypt hashing
-- CORS enabled and sensitive values via environment variables
-- React app with Home, Login (mock UI), and Sign Up (register) pages
-- Form validation and friendly success/error feedback using React Query
+- Access token (in-memory) + Refresh token (localStorage)
+- Axios instance attaches access token and auto-refreshes on 401
+- React Query for login/logout mutations and fetching protected user data
+- React Hook Form + Zod for form validation
+- Protected routes with automatic redirect to Login
+- Ready for deployment on Netlify/Vercel (set `VITE_API_URL`)
 
 ---
 
@@ -30,6 +32,10 @@ Copy `.env.example` to `.env` and adjust values:
 PORT=3000
 MONGODB_URI=mongodb://localhost:27017/ia03
 CORS_ORIGIN=http://localhost:5173
+JWT_ACCESS_SECRET=dev_access_secret_change_me
+JWT_REFRESH_SECRET=dev_refresh_secret_change_me
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 ```
 
 2) Install and run
@@ -44,6 +50,9 @@ The API will listen on `http://localhost:3000`.
 
 Endpoints:
 - `POST /user/register` { email, password } → `{ message: string }`
+- `POST /auth/login` { email, password } → `{ accessToken, refreshToken, user }`
+- `POST /auth/refresh` { refreshToken } → `{ accessToken }`
+- `GET /auth/me` Authorization: `Bearer <accessToken>` → `{ id, email }`
 
 ---
 
@@ -70,9 +79,16 @@ npm run dev
 Open the app at the URL printed by Vite (usually `http://localhost:5173`).
 
 Pages:
-- `/` Home
-- `/register` Sign Up
-- `/login` Login (mock UI only)
+- `/` Home (public)
+- `/register` Sign Up (calls backend)
+- `/login` Login (calls backend)
+- `/dashboard` Protected – shows user info, requires valid access token (auto-refresh supported)
+
+Auth flow (client):
+- On login success, store `accessToken` in memory and `refreshToken` in `localStorage`.
+- Axios attaches `Authorization: Bearer <accessToken>` to every request.
+- If a request returns 401, Axios tries to refresh using the stored refresh token and then retries.
+- On logout or refresh failure, tokens are cleared and the app redirects to `/login`.
 
 ---
 
@@ -91,8 +107,14 @@ Pages:
 
 ---
 
+## Public demo URL
+Deploy the app and paste your public URL here:
+
+Production URL: https://your-public-demo.example.com
+
+---
+
 ## Notes
-- This project keeps the Login page as a UI mock per requirement. Only registration is wired to the backend.
 - Passwords are hashed with bcrypt before storing.
 - Validation uses `class-validator` on the backend and `zod` on the frontend.
 

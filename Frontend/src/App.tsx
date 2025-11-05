@@ -1,7 +1,10 @@
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import { useEnsureAccessToken } from './lib/useEnsureAccessToken';
+import { getAccessToken, getRefreshToken } from './lib/auth';
 
 function Navbar() {
   const { pathname } = useLocation();
@@ -24,6 +27,30 @@ function Navbar() {
 }
 
 export default function App() {
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  function Protected({ children }: { children: JSX.Element }) {
+    // Gọi hook luôn luôn để đảm bảo rules of hooks và cập nhật lại khi refresh xong
+    const status = useEnsureAccessToken(baseURL);
+
+    // Nếu đã có access token sẵn (trong phiên hiện tại), render luôn
+    if (getAccessToken()) return children;
+
+    // Nếu đang kiểm tra hoặc mới khởi tạo, hiển thị trạng thái chờ
+    if (status === 'idle' || status === 'checking') {
+      return (
+        <div className="max-w-5xl mx-auto px-4 py-12">
+          <p>Đang xác thực phiên…</p>
+        </div>
+      );
+    }
+
+    // Khi hook báo ready (đã refresh xong), render children
+    if (status === 'ready') return children;
+
+    // Còn lại là failed → chuyển về login
+    return <Navigate to="/login" replace />;
+  }
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -32,6 +59,14 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/dashboard"
+            element={
+              <Protected>
+                <Dashboard />
+              </Protected>
+            }
+          />
         </Routes>
       </main>
       <footer className="border-t bg-white">

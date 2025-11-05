@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import api from '../lib/api';
+import { setAccessToken, setRefreshToken } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
 
 type AuthTab = 'login' | 'signup';
@@ -37,14 +38,22 @@ export default function Auth({ initialTab = 'login' as AuthTab }) {
     },
   });
 
-  // Login form (mock)
+  // Login form
   const loginForm = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  const handleLogin = loginForm.handleSubmit(() => {
-    navigate('/', { state: { flash: 'Đăng nhập giả lập thành công!' }, replace: true });
+  const loginMutation = useMutation({
+    mutationFn: async (data: SignupValues) => {
+      const res = await api.post('/auth/login', data);
+      return res.data as { accessToken: string; refreshToken: string; user: { id: string; email: string } };
+    },
+    onSuccess: (data) => {
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+      navigate('/dashboard', { replace: true });
+    },
   });
 
   const Title = () => (
@@ -52,23 +61,6 @@ export default function Auth({ initialTab = 'login' as AuthTab }) {
       <h1 className="text-2xl font-bold mb-1">
         {tab === 'login' ? 'Đăng nhập' : 'Tạo tài khoản'}
       </h1>
-      <p className="text-sm text-gray-600">
-        {tab === 'login' ? (
-          <>
-            Chưa có tài khoản?{' '}
-            <button type="button" onClick={() => setTab('signup')} className="text-blue-600 hover:underline">
-              Sign up
-            </button>
-          </>
-        ) : (
-          <>
-            Bạn đã có tài khoản?{' '}
-            <button type="button" onClick={() => setTab('login')} className="text-blue-600 hover:underline">
-              Login
-            </button>
-          </>
-        )}
-      </p>
     </div>
   );
 
@@ -79,7 +71,12 @@ export default function Auth({ initialTab = 'login' as AuthTab }) {
           <Title />
 
           {tab === 'login' ? (
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={loginForm.handleSubmit((d) => loginMutation.mutate(d))} className="space-y-4">
+              {loginMutation.isError && (
+                <div className="rounded-md border border-red-600 bg-red-50 p-3 text-sm text-red-700">
+                  {(loginMutation.error as any)?.response?.data?.message || 'Đăng nhập thất bại'}
+                </div>
+              )}
               <div>
                 <label htmlFor="login-email" className="label">Email</label>
                 <input id="login-email" type="email" className="input" placeholder="you@example.com" {...loginForm.register('email')} />
@@ -90,7 +87,9 @@ export default function Auth({ initialTab = 'login' as AuthTab }) {
                 <input id="login-password" type="password" className="input" placeholder="••••••••" {...loginForm.register('password')} />
                 {loginForm.formState.errors.password && <p className="error">{loginForm.formState.errors.password.message}</p>}
               </div>
-              <button type="submit" className="btn btn-primary w-full">Log in</button>
+              <button type="submit" className="btn btn-primary w-full" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? 'Đang đăng nhập…' : 'Log in'}
+              </button>
             </form>
           ) : (
             <form onSubmit={handleSubmit((d) => signupMutation.mutate(d))} className="space-y-4">
@@ -114,7 +113,25 @@ export default function Auth({ initialTab = 'login' as AuthTab }) {
               </button>
             </form>
           )}
+          
         </div>
+         <p className="text-sm text-gray-600 text-center mb-4">
+        {tab === 'login' ? (
+          <>
+            Chưa có tài khoản?{' '}
+            <button type="button" onClick={() => setTab('signup')} className="text-blue-600 hover:underline">
+              Sign up
+            </button>
+          </>
+        ) : (
+          <>
+            Bạn đã có tài khoản?{' '}
+            <button type="button" onClick={() => setTab('login')} className="text-blue-600 hover:underline">
+              Login
+            </button>
+          </>
+        )}
+      </p>
       </div>
     </section>
   );

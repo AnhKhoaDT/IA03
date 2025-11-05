@@ -9,9 +9,6 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  // CORS: allow all origins (useful for quick demos or when deploying FE/BE separately)
-  // NOTE: This is permissive. For production security, replace `origin: true` with an
-  // allowlist from process.env.CORS_ORIGIN and redeploy.
   app.enableCors({
     origin: true, // reflect request origin, effectively allowing all
     credentials: true,
