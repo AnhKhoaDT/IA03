@@ -110,7 +110,7 @@ Auth flow (client):
 ## Public demo URL
 Deploy the app and paste your public URL here:
 
-Production URL: https://your-public-demo.example.com
+Deploy URL: https://ia03-fe-45p9.onrender.com
 
 ---
 
