@@ -4,6 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IA03 User Auth</title>
+    <!-- SPA fallback helper for GitHub Pages:
+         When 404.html redirects to /IA03/?/path, this script restores the path
+         back to /IA03/path before the app boots. Safe on other hosts. -->
+    <script>
+      (function () {
+        var l = window.location;
+        // %BASE_URL% is replaced by Vite at build time (e.g. '/IA03/' on Pages, '/' elsewhere)
+        var base = '%BASE_URL%';
+        if (l.search && l.search.startsWith('?/')) {
+          var path = l.search.slice(2).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, null, base + path + l.hash);
+        }
+      })();
+    </script>
   </head>
   <body class="min-h-screen bg-gray-50">
     <div id="root"></div>
