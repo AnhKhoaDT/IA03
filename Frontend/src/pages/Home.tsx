@@ -26,7 +26,7 @@ export default function Home() {
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Welcome you to IA03 User Registration</h1>
           <p className="mt-4 text-gray-600">
-            This demo showcases a simple registration flow with a NestJS backend and a React frontend.
+            This demo of me showcases a simple registration flow with a NestJS backend and a React frontend.
           </p>
           <div className="mt-6 flex gap-3">
             <button

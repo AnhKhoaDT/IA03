@@ -33,7 +33,8 @@ jobs:
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./frontend/dist
+          # NOTE: 'uses' steps don't inherit working-directory; path is repo-root relative and case-sensitive
+          path: ./Frontend/dist
 
   deploy-frontend:
     name: Deploy Frontend
