@@ -24,7 +24,7 @@ export default function Home() {
       )}
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Welcome to IA03 User Registration</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Welcome you to IA03 User Registration</h1>
           <p className="mt-4 text-gray-600">
             This demo showcases a simple registration flow with a NestJS backend and a React frontend.
           </p>
