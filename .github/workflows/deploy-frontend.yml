@@ -1,57 +1,47 @@
-name: Deploy Frontend to GitHub Pages
+name: CD - Deploy Frontend to GitHub Pages
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+    paths:
+      - 'Frontend/**'
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  build:
+  build-frontend:
+    name: Build Frontend
     runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ./Frontend } }
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: Frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: Frontend
-        run: npm ci
-
-      - name: Build
-        working-directory: Frontend
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run build
         env:
-          # Set to true so Vite uses base "/IA03/" for GitHub Pages
           GITHUB_PAGES: 'true'
-          # Create a repository secret BACKEND_URL with your backend base URL, e.g. https://api.example.com
-          VITE_API_URL: ${{ secrets.BACKEND_URL }}
-        run: npm run build
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+          # Set API base URL for production build (read from repository Variables)
+          # Go to Settings > Secrets and variables > Actions > Variables and create VITE_API_URL
+          # Example: https://my-app-latest-uss4.onrender.com
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+      # SPA fallback cho GitHub Pages: 404.html = index.html
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
-          path: Frontend/dist
+          path: ./frontend/dist
 
-  deploy:
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: build-frontend
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
