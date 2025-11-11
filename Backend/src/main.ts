@@ -9,11 +9,13 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // Allow any origin (wildcard). Note: credentials must be disabled for '*'
   app.enableCors({
-    origin: true, // reflect request origin, effectively allowing all
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
+    origin: '*',
+    credentials: false,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(

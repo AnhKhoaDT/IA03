@@ -3,7 +3,8 @@ import { getAccessToken, setAccessToken, clearTokens } from './auth';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-export const api = axios.create({ baseURL, withCredentials: true });
+// No cookies used; allow public CORS with wildcard
+export const api = axios.create({ baseURL, withCredentials: false });
 
 // Attach access token to every request
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -65,8 +66,7 @@ api.interceptors.response.use(
       try {
         const res = await axios.post(
           `${baseURL}/auth/refresh`,
-          { refreshToken: storedRefresh },
-          { withCredentials: true }
+          { refreshToken: storedRefresh }
         );
         const newAccess = (res.data as any)?.accessToken as string;
         if (!newAccess) throw new Error('No access token in refresh response');
